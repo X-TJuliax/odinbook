@@ -1,0 +1,11 @@
+<%= form_for(@post) do |form| %>
+    <div class="field">
+      <%= form.label :description, "Please write what you want to talk" %>
+      <%= form.text_area :description %>
+    </div>
+
+    <div class="action">
+      <%= form.submit "Create post" %>
+
+    </div>
+<% end %>

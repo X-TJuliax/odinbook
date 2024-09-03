@@ -1,0 +1,65 @@
+<% if flash[:alert] %>
+  <div class="alert alert-warning">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<%= form_with model: @post, local: true do |form| %>
+  <div class="desc_field">
+    <%= form.label :description %>
+    <%= form.text_area :description %>
+  </div>
+  <div class="action">
+    <%= form.submit "Create Post" %>
+  </div>
+<% end %>
+
+<% @users.each do |user| %>
+  <h1><%= user.email %></h1><br>
+  <% user.posts.each do |post| %>
+    <p>Post: <%= post.description %></p>
+    <p>Likes: <%= post.likes.count %></p>
+    <p>Comments:</p>
+    <% post.comments.each do |comment| %>
+      <p><strong><%= comment.user.email %>:</strong> <%= comment.content %></p>
+      <% if current_user && current_user == comment.user %>
+        <%= form_with url: post_comment_path(post, comment), method: :delete, local: true do |form| %>
+          <div class="action">
+            <%= form.submit "Delete" %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if current_user %>
+     <%= form_with model: [post, Comment.new], local: true do |form| %>
+        <div class="desc_field">
+          <%= form.label :content, "Add your comment..." %>
+          <%= form.text_area :content %>
+        </div>
+        <div class="action">
+          <%= form.submit "Comment" %>
+        </div>
+      <% end %>
+    <% end %>  
+
+    <% if current_user && post.likers.include?(current_user) %>
+      <%= form_with url: post_like_path(post, post.likes.find_by(user: current_user)), method: :delete, local: true do |form| %>
+        <%= form.submit "Unlike" %>
+      <% end %>
+    <% elsif current_user %>
+      <%= form_with url: post_likes_path(post), method: :post, local: true do |form| %>
+        <%= form.submit "Like" %>
+      <% end %>
+    <% end %>
+
+    <hr>
+  <% end %>
+<% end %>
+
+<% if current_user %>
+  <%= current_user.email %>
+  <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
+<% else %>
+  <%= link_to "Sign in", new_user_session_path %>
+<% end %>
